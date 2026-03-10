@@ -1,14 +1,14 @@
 const express = require("express");
 const verifyToken = require("../middleware/verify-token.js");
-const Restaurant = require("../models/restaurant.js");
+const Diary = require("../models/diary.js");
 const router = express.Router();
 
 router.post("/", verifyToken, async (req, res) => {
   try {
     req.body.author = req.user._id;
-    const restaurant = await Restaurant.create(req.body);
-    restaurant._doc.author = req.user;
-    res.status(201).json(restaurant);
+    const diary = await Diary.create(req.body);
+    diary._doc.author = req.user;
+    res.status(201).json(diary);
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
@@ -16,10 +16,10 @@ router.post("/", verifyToken, async (req, res) => {
 
 router.get("/", verifyToken, async (req, res) => {
   try {
-    const restaurants = await Restaurant.find({})
+    const diarys = await Diary.find({})
       .populate("author")
       .sort({ createdAt: "desc" });
-    res.status(200).json(restaurants);
+    res.status(200).json(diarys);
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
