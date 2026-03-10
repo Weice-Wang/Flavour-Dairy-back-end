@@ -11,7 +11,7 @@ const commentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const restaurantSchema = new mongoose.Schema(
+const diarySchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -37,6 +37,6 @@ const restaurantSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Restaurant = mongoose.model("Restaurant", restaurantSchema);
+const Diary = mongoose.model("Diary", diarySchema);
 
-module.exports = Restaurant;
+module.exports = Diary;
