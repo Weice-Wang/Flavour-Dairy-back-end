@@ -23,6 +23,73 @@ router.get("/", verifyToken, async (req, res) => {
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
+}); 
+
+router.get("/:diaryId", verifyToken, async (req, res) => {
+  try {
+    const diary = await Diary.findById(req.params.diaryId).populate([
+      "author",
+      "comments.author",
+    ]);
+
+    res.status(200).json(diary);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
 });
 
+
+router.put("/:diaryId", verifyToken, async (req, res) => {
+  try {
+    const diary = await Diary.findById(req.params.diaryId);
+
+    if (!diary.author.equals(req.user._id)) {
+      return res.status(403).send("You're not allowed to do that!");
+    }
+
+    const updatedDiary = await Diary.findByIdAndUpdate(
+      req.params.diaryId,
+      req.body,
+      { new: true }
+    );
+
+    updatedDiary._doc.author = req.user;
+
+    res.status(200).json(updatedDiary);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+router.delete("/:diaryId", verifyToken, async (req, res) => {
+  try {
+    const diary = await Diary.findById(req.params.diaryId);
+
+    if (!diary.author.equals(req.user._id)) {
+      return res.status(403).send("You're not allowed to do that!");
+    }
+
+    await diary.deleteOne();
+
+    res.status(200).json({ message: "Diary entry deleted!" });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+router.post("/:diaryId/comments", verifyToken, async (req, res) => {
+  try {
+    req.body.author = req.user._id;
+    const diary = await Diary.findById(req.params.diaryId);
+    diary.comments.push(req.body);
+    await diary.save();
+
+    const newComment = diary.comments[diary.comments.length - 1];
+    newComment._doc.author = req.user;
+
+    res.status(201).json(newComment);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
 module.exports = router;
