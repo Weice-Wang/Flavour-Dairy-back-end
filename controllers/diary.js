@@ -91,4 +91,48 @@ router.post("/:diaryId/comments", verifyToken, async (req, res) => {
     res.status(500).json({ err: err.message });
   }
 });
+
+router.put("/:diaryId/comments/:commentId", verifyToken, async (req, res) => {
+  try {
+    const diary = await Diary.findById(req.params.diaryId);
+    const comment = diary.comments.id(req.params.commentId);
+
+    if (comment.author.toString() !== req.user._id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this comment" });
+    }
+
+    comment.text = req.body.text;
+    await diary.save();
+    res.status(200).json({ message: "Comment updated successfully" });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+router.delete(
+  "/:diaryId/comments/:commentId",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const diary = await Diary.findById(req.params.diaryId);
+      const comment = diary.comments.id(req.params.commentId);
+
+      // ensures the current user is the author of the comment
+      if (comment.author.toString() !== req.user._id) {
+        return res
+          .status(403)
+          .json({ message: "You are not authorized to edit this comment" });
+      }
+
+      diary.comments.remove({ _id: req.params.commentId });
+      await diary.save();
+      res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ err: err.message });
+    }
+  },
+);
+
 module.exports = router;
