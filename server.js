@@ -21,7 +21,14 @@ mongoose.connection.on("connected", () => {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+ origin: [
+    "http://localhost:5173", // Vite dev server
+    "https://flavourdairy.netlify.app"
+ ],
+ methods: ["GET","POST","PUT","DELETE"],
+ credentials: true
+}));
 app.use(express.json());
 app.use(logger("dev"));
 
